@@ -1,0 +1,8 @@
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  <b>Black Duck Protex Plugin</b> 
+  <br/>Requires Protex Server running Protex SDK 6.2 - Possible Actions : 
+  <ul><li>Clone or Create Project</li><li>Scan Project</li></ul>
+</div>

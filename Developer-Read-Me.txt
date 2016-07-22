@@ -1,0 +1,8 @@
+Instructions for developers.
+
+To develop this plugin in Eclipse and appease the m2e gods that complain about lifecycle mappings not covered:
+* Open Preferences "life cycle mappings"
+* Browse to the m2e-lifecycle-mapping-metadata.xml file in this project
+* Apply
+* Select Project
+** Right click --> Maven --> Update Project ...   

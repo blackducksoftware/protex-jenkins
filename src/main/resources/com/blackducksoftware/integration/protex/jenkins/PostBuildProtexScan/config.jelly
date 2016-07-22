@@ -1,0 +1,93 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+  
+  <st:once>
+		<script type="text/javascript"
+			src="${rootURL}/plugin/protex-jenkins/js/ProtexJenkinsScanJavaScript.js" />
+	</st:once>
+	
+	
+	<script>
+		//this method from Jenkins hudson-behavior.js
+		var checker = function(el) {
+		
+        	var target = el.targetElement;
+        	FormChecker.sendRequest(el.targetUrl(), {
+            	method : 'post',
+            	onComplete : function(x) {
+            	    target.innerHTML = x.responseText;
+            	   Behaviour.applySubtree(target);
+           	 	}
+        	});
+    	}
+
+		function customOnClick(method, withVars, button){
+	
+			validateButton('${descriptor.descriptorFullUrl}/'+method, withVars , button);	
+
+			var protexPostProjectName = document.getElementsByName('_.protexPostProjectName')[0];
+			
+			// wait 900 ms before running the checks
+			// otherwise it happens too quick and shows that the project doesnt exist yet
+			setTimeout(function(){checker(protexPostProjectName);}, 1000);
+		}
+	</script>
+	
+	
+	
+  
+ <f:entry title="${%Protex_Server}" field="protexServerId" >
+	<f:select />
+ </f:entry>
+ 
+ <f:entry title="${%Protex_Credentials}" field="protexPostCredentials" >
+	<c:select />
+  </f:entry>
+	
+	<!-- if we can find a way to add an onblur event to the entry tag, we can dynamically check for variables in the fields, and 
+	disable/enable the create project button as needed.  I cant get the onblur event to trigger, so we will have to settle with the form
+	validation methods that Jenkins provides us, and give proper messages to the User -->
+	
+  <f:entry title="${%Protex_Project_Name}" field="protexPostProjectName"  > 
+    <f:textbox />
+  </f:entry>
+  
+ 	
+  <f:entry title="${%Protex_Clone_Project_Name}" field="protexPostTemplateProjectName"> 
+     	<f:textbox />
+   </f:entry>
+   
+  <!-- 
+  <f:validateButton title="${%Protex_Create_Project}" progress="${%Protex_Create_Project_Progress}"
+         					method="createProject" with="protexServerId,protexPostCredentials,protexPostProjectName,protexPostTemplateProjectName"/>
+    -->
+         					
+    <f:entry>
+    	<div style="float:right">
+      		<input name="protexCreateButton" type="button" value="${%Protex_Create_Project}" class="yui-button validate-button" onclick="customOnClick('createProject', 'protexServerId,protexPostCredentials,protexPostProjectName,protexPostTemplateProjectName', this);" />
+    	</div>
+    	<div style="display:none;">
+      		<img src="${imagesURL}/spinner.gif" /> ${%Protex_Create_Project_Progress}
+    	</div>
+    	<div style="float:right"> </div>
+	</f:entry>
+
+    <f:entry title="${%Protex_Scan_Memory}" field="protexScanMemory">
+ 		<f:number default="${descriptor.getDefaultMemory()}"/>
+   </f:entry>		
+         					
+    <f:entry title="${%Protex_Project_Source_Path}" field="protexPostProjectSourcePath">
+ 		<f:textbox />
+   </f:entry>
+   
+   <f:advanced>
+   		<f:entry title="${%Protex_Report_Template}" field="protexReportTemplate">
+	 		<f:textbox />
+	   </f:entry>
+   </f:advanced>
+ 	
+</j:jelly>

@@ -1,0 +1,53 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+  <!--
+    This Jelly script is used to produce the global configuration option.
+
+    Jenkins uses a set of tag libraries to provide uniformity in forms.
+    To determine where this tag is defined, first check the namespace URI,
+    and then look under $JENKINS/views/. For example, <f:section> is defined
+    in $JENKINS/views/lib/form/section.jelly.
+
+    It's also often useful to just check other similar scripts to see what
+    tags they use. Views are always organized according to its owner class,
+    so it should be straightforward to find them.
+  -->
+<f:section title="${%Protex_Global_Section_Title}">
+	<f:block>
+		<f:repeatable field="protexServers" var="protexServer" add="${%Protex_Add_Server}" minimum="1" checkurl="'${rootURL}/descriptorByName/com.blackducksoftware.integration.protex.jenkins.PostBuildProtexScan/checkProtexServer'+qs(this).nearBy('protexServer')">
+			<table style="width:100%">
+				<f:entry title="${%Protex_Server_Name}" field="protexPostServerName">
+					<f:textbox/>
+            	</f:entry>
+				<f:entry title="${%Protex_Server_Url}" field="protexPostServerUrl">
+					<f:textbox/>
+            	</f:entry>
+            	<f:entry field="protexServerId">
+            		<div style="display:none;">
+            			<f:textbox/>
+            		</div>
+            	</f:entry>
+            	<f:advanced>
+            		<f:entry title="${%Global_Protex_Credentials_Field}" field="protexTestCredentialsId" >
+    					<c:select/>
+    				</f:entry>
+    				<f:entry title="${%Protex_Global_Timeout}" field="protexPostServerTimeOut" description="${%Protex_Timeout_Description}">
+						<f:textbox default="${descriptor.DEFAULT_TIMEOUT}" />
+    				</f:entry>
+    				 <f:validateButton title="${%Protex_Test_Connection}" progress="${%Test_Connection_Progress}"
+         					method="testConnection" with="protexPostServerUrl,protexTestCredentialsId,protexPostServerTimeOut" />
+    			</f:advanced>
+            	<f:entry>
+            		<div align="right">
+						<f:repeatableDeleteButton value="${%Protex_Delete_Server}"/>
+					</div>
+				</f:entry>
+			</table>
+		</f:repeatable>
+	</f:block>    
+	
+	
+	
+</f:section>
+
+
+</j:jelly>

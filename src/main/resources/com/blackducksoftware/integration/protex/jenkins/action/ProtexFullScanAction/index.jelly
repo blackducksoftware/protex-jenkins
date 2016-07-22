@@ -1,0 +1,15 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+    xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <!-- This jelly script is used for per-project configuration. See global.jelly 
+        for a general discussion about jelly script. -->
+        
+    <!-- redirect to the relative url startProtexFullScanBuild from this action's URL.
+    	startProtexFullScanBuild is not a jelly file instead it is a dynamic 
+    	method that stapler will call.  Therefore the doStartProtexFullScanBuild method of the action will be 
+    	called because we are invoking a URL from a jelly file for an action.
+    	Because we are redirecting the parent is still the referer and the referer is 
+    	used to by the doStartProtexFullScanBuild method to redirect back to the 
+    	page that invoked this action.
+     -->
+    <st:redirect url="startProtexFullScanBuild"/>
+</j:jelly>
