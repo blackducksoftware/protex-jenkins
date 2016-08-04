@@ -1,6 +1,11 @@
 ## Overview ##
 The protex-jenkins plugin allows the User to run scans during a Jenkins Build as a Post-Build Action.
 
+## Build ##
+
+[![Build Status](https://travis-ci.org/blackducksoftware/protex-jenkins.svg?branch=master)](https://travis-ci.org/blackducksoftware/protex-jenkins)
+[![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/protex-jenkins/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/protex-jenkins?branch=master)
+
 ## Where can I get the latest release? ##
 You can download the latest source from GitHub: https://github.com/blackducksoftware/protex-jenkins. 
 
