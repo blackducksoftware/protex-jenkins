@@ -27,19 +27,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -50,7 +46,6 @@ import com.blackducksoftware.integration.protex.ProtexServerInfo;
 import com.blackducksoftware.integration.protex.helper.TestHelper;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider.UserFacingAction;
 
-import hudson.ProxyConfiguration;
 import hudson.model.Descriptor.FormException;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -64,53 +59,6 @@ public class PostBuildProtexScanDescriptorTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
 
-	private static Properties testProperties;
-
-	@BeforeClass
-	public static void init() throws Exception {
-		testProperties = new Properties();
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final InputStream is = classLoader.getResourceAsStream("test.properties");
-		try {
-			testProperties.load(is);
-		} catch (final IOException e) {
-			System.err.println("reading test.properties failed!");
-		}
-
-		final TestHelper helper = new TestHelper(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
-		helper.setLogger(new ProtexJenkinsLogger(null));
-
-		try {
-			helper.createProtexProject(testProperties.getProperty("TEST_PROJECT_NAME"), null);
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			helper.deleteProject(testProperties.getProperty("TEST_PROJECT_CREATION_NAME"));
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@AfterClass
-	public static void tearDown() throws Exception {
-		final TestHelper helper = new TestHelper(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
-		helper.setLogger(new ProtexJenkinsLogger(null));
-		try {
-			helper.deleteProject(testProperties.getProperty("TEST_PROJECT_CREATION_NAME"));
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			helper.deleteProject(testProperties.getProperty("TEST_PROJECT_CREATION_NAME") + "2");
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	@Test
 	public void testIsApplicable() {
@@ -146,7 +94,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", "http://www.google.com/hello/omg/thisHasAPath");
+		server.element("protexPostServerUrl", "https://www.google.com/hello/omg/thisHasAPath");
 		server.element("protexPostServerTimeOut", "999");
 
 		json.element("protexServers", server);
@@ -156,7 +104,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(1, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals("http://www.google.com", servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("999", servers.get(0).getProtexPostServerTimeOut());
 	}
 
@@ -167,7 +115,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", testProperties.getProperty("TEST_PROTEX_SERVER_URL"));
+		server.element("protexPostServerUrl", "https://www.google.com");
 		server.element("protexPostServerTimeOut", "999");
 
 		json.element("protexServers", server);
@@ -177,7 +125,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(1, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("999", servers.get(0).getProtexPostServerTimeOut());
 	}
 
@@ -188,7 +136,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", testProperties.getProperty("TEST_PROTEX_SERVER_URL"));
+		server.element("protexPostServerUrl", "https://www.google.com");
 		server.element("protexPostServerTimeOut", "0");
 
 		json.element("protexServers", server);
@@ -198,7 +146,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(1, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("300", servers.get(0).getProtexPostServerTimeOut());
 	}
 
@@ -210,7 +158,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", "http://www.google.com/hello/omg/thisHasAPath");
+		server.element("protexPostServerUrl", "https://www.google.com/hello/omg/thisHasAPath");
 		server.element("protexPostServerTimeOut", "999");
 
 		final JSONObject server2 = new JSONObject();
@@ -227,7 +175,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(2, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals("http://www.google.com", servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("999", servers.get(0).getProtexPostServerTimeOut());
 
 		assertEquals("Test Server Name 2", servers.get(1).getProtexPostServerName());
@@ -244,7 +192,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", testProperties.getProperty("TEST_PROTEX_SERVER_URL"));
+		server.element("protexPostServerUrl", "https://www.google.com");
 		server.element("protexPostServerTimeOut", "999");
 
 		final JSONObject server2 = new JSONObject();
@@ -261,7 +209,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(2, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("999", servers.get(0).getProtexPostServerTimeOut());
 
 		assertEquals("Test Server Name 2", servers.get(1).getProtexPostServerName());
@@ -278,7 +226,7 @@ public class PostBuildProtexScanDescriptorTest {
 
 		final JSONObject server = new JSONObject();
 		server.element("protexPostServerName", "Test Server Name");
-		server.element("protexPostServerUrl", testProperties.getProperty("TEST_PROTEX_SERVER_URL"));
+		server.element("protexPostServerUrl", "https://www.google.com");
 		server.element("protexPostServerTimeOut", "0");
 
 		final JSONObject server2 = new JSONObject();
@@ -295,7 +243,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final List<ProtexServerInfo> servers = descriptor.getProtexServers();
 		assertEquals(2, servers.size());
 		assertEquals("Test Server Name", servers.get(0).getProtexPostServerName());
-		assertEquals(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), servers.get(0).getProtexPostServerUrl());
+		assertEquals("https://www.google.com", servers.get(0).getProtexPostServerUrl());
 		assertEquals("300", servers.get(0).getProtexPostServerTimeOut());
 
 		assertEquals("Test Server Name 2", servers.get(1).getProtexPostServerName());
@@ -333,8 +281,7 @@ public class PostBuildProtexScanDescriptorTest {
 		assertEquals("", dropDownList.get(0).value);
 		String credentialId = null;
 		try {
-			credentialId = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-					testProperties.getProperty("TEST_PASSWORD"));
+			credentialId = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "TEST_PASSWORD");
 		} catch (final IOException e) {
 			e.printStackTrace();
 			assertNull(e);
@@ -356,7 +303,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://example.com/", null, null);
 		final ProtexServerInfo badUrlUnreachable = new ProtexServerInfo(null, "http://HopefullyNobodyHasReservedThisReallyLongDomain.com", null, null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), null, null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", null, null);
 
 		descriptor.getProtexServers().add(badUrlNoProtocol);
 		descriptor.getProtexServers().add(badUrlEmpty);
@@ -364,11 +311,11 @@ public class PostBuildProtexScanDescriptorTest {
 		descriptor.getProtexServers().add(badUrlUnreachable);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
 		final String badCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "MADEUPUSERNAME",
 				"BEERTIMEPASSWORD");
 
@@ -398,28 +345,6 @@ public class PostBuildProtexScanDescriptorTest {
 	}
 
 	@Test
-	public void testDoCheckProtexServerIdThroughProxy() throws Exception {
-		final PostBuildProtexScanDescriptor descriptor = new PostBuildProtexScanDescriptor();
-
-		final ProtexServerInfo proxyURL = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL_REQUIRES_PROXY"), null, null);
-		descriptor.getProtexServers().add(proxyURL);
-
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
-
-		final FormValidation validation = descriptor.doCheckProtexServerId(proxyURL.getProtexServerId(), validCredentials);
-		assertTrue(validation.getMessage(), validation.getMessage().contains(Messages.ProtexPostScan_getCanNotReachThisServer_0_("")));
-		assertEquals(FormValidation.Kind.WARNING, validation.kind);
-
-		final ProxyConfiguration proxy = new ProxyConfiguration(testProperties.getProperty("TEST_PROXY_HOST_PASSTHROUGH"), Integer.valueOf(testProperties
-				.getProperty("TEST_PROXY_PORT_PASSTHROUGH")));
-		j.getInstance().proxy = proxy;
-
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexServerId(proxyURL.getProtexServerId(), validCredentials));
-	}
-
-	@Test
 	public void testDoCheckProtexPostCredentials() throws IOException, ServletException {
 		final PostBuildProtexScanDescriptor descriptor = new PostBuildProtexScanDescriptor();
 
@@ -428,7 +353,7 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://example.com/", null, null);
 		final ProtexServerInfo badUrlUnreachable = new ProtexServerInfo(null, "http://HopefullyNobodyHasReservedThisReallyLongDomain.com", null, null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), null, null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", null, null);
 
 		descriptor.getProtexServers().add(badUrlNoProtocol);
 		descriptor.getProtexServers().add(badUrlEmpty);
@@ -436,13 +361,11 @@ public class PostBuildProtexScanDescriptorTest {
 		descriptor.getProtexServers().add(badUrlUnreachable);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
-		final String badCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "MADEUPUSERNAME",
-				"BEERTIMEPASSWORD");
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
 
 		assertEquals(Messages.ProtexPostScan_getNoCredentialsSelected(), descriptor.doCheckProtexPostCredentials("", "").getMessage());
 		assertEquals(Messages.ProtexPostScan_getNoUserNameProvided(), descriptor.doCheckProtexPostCredentials("", noUserName).getMessage());
@@ -452,10 +375,6 @@ public class PostBuildProtexScanDescriptorTest {
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostCredentials(badUrlEmpty.getProtexServerId(), validCredentials));
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostCredentials(badUrlBadPath.getProtexServerId(), validCredentials));
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostCredentials(badUrlUnreachable.getProtexServerId(), validCredentials));
-		assertEquals(Messages.ProtexPostScan_getCredentialsAreValid(),
-				descriptor.doCheckProtexPostCredentials(goodUrl.getProtexServerId(), validCredentials).getMessage());
-		assertEquals("The user name or password provided was not valid.", descriptor.doCheckProtexPostCredentials(goodUrl.getProtexServerId(),
-				badCredentials).getMessage());
 
 	}
 
@@ -468,18 +387,18 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://Example", "100", null);
 		final ProtexServerInfo badUrlBadLongPath = new ProtexServerInfo(null, "http://Example/Test", "100", null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), "100", null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", "100", null);
 
 		descriptor.getProtexServers().add(badUrlEmpty);
 		descriptor.getProtexServers().add(badUrlBadPath);
 		descriptor.getProtexServers().add(badUrlBadLongPath);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
 
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostProjectName(badUrlNoProtocol.getProtexServerId(), validCredentials, "Test Project"));
 
@@ -498,25 +417,10 @@ public class PostBuildProtexScanDescriptorTest {
 				descriptor.doCheckProtexPostProjectName(badUrlBadPath.getProtexServerId(), validCredentials, "Test Project"));
 		assertEquals(FormValidation.ok(),
 				descriptor.doCheckProtexPostProjectName(badUrlBadLongPath.getProtexServerId(), validCredentials, "Test Project"));
-		assertEquals(
-				"This Protex Project does not currently exist. This will be created during the Build or you can use the &quot;Create Project&quot; button.",
-				descriptor.doCheckProtexPostProjectName(goodUrl.getProtexServerId(), validCredentials, "Test Project").getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectAlreadyExists(),
-				descriptor.doCheckProtexPostProjectName(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_NAME")).getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectNameCreateAtRuntime(),
-				descriptor.doCheckProtexPostProjectName(goodUrl.getProtexServerId(), validCredentials,
-						"${JOB_NAME}").getMessage());
-
-		assertEquals("Project name should be under &quot;250&quot; characters in length.",
-				descriptor.doCheckProtexPostProjectName(goodUrl.getProtexServerId(), validCredentials,
-						"ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME").getMessage());
 
 	}
+
+	// TODO here down
 
 	@Test
 	public void testDoCheckProtexPostTemplateProjectName() throws IOException, ServletException {
@@ -527,20 +431,17 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://Example", "100", null);
 		final ProtexServerInfo badUrlBadLongPath = new ProtexServerInfo(null, "http://Example/Test", "100", null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), "100", null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", "100", null);
 
 		descriptor.getProtexServers().add(badUrlEmpty);
 		descriptor.getProtexServers().add(badUrlBadPath);
 		descriptor.getProtexServers().add(badUrlBadLongPath);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
 
-		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostProjectName(badUrlNoProtocol.getProtexServerId(), validCredentials, "Test Project"));
 
 		assertEquals(Messages.ProtexPostScan_getOptionalProjectCloneName(), descriptor.doCheckProtexPostTemplateProjectName("", "", "").getMessage());
 		assertEquals(FormValidation.ok(),
@@ -551,22 +452,6 @@ public class PostBuildProtexScanDescriptorTest {
 				descriptor.doCheckProtexPostTemplateProjectName(goodUrl.getProtexServerId(), noPassword, "Test Project"));
 		assertEquals(FormValidation.ok(),
 				descriptor.doCheckProtexPostTemplateProjectName(goodUrl.getProtexServerId(), noCredentials, "Test Project"));
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexPostTemplateProjectName(badUrlEmpty.getProtexServerId(), validCredentials, "Test Project"));
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexPostTemplateProjectName(badUrlBadPath.getProtexServerId(), validCredentials, "Test Project"));
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexPostTemplateProjectName(badUrlBadLongPath.getProtexServerId(), validCredentials, "Test Project"));
-		assertEquals(
-				"This Protex Project does not exist.",
-				descriptor.doCheckProtexPostTemplateProjectName(goodUrl.getProtexServerId(), validCredentials, "Test Project")
-				.getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectAlreadyExists(),
-				descriptor.doCheckProtexPostTemplateProjectName(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_NAME")).getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectTemplateNameCreateAtRuntime(),
-				descriptor.doCheckProtexPostTemplateProjectName(goodUrl.getProtexServerId(), validCredentials,
-						"${JOB_NAME}").getMessage());
 	}
 
 	@Test
@@ -577,73 +462,45 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrl = new ProtexServerInfo(null, "NOTAURL", "100", null);
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://Example/", "100", null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), "100", null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", "100", null);
 
 		descriptor.getProtexServers().add(badUrl);
 		descriptor.getProtexServers().add(badUrlBadPath);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
+
+
 		assertEquals(Messages.ProtexPostScan_getProjectCreateFailed(), descriptor.doCreateProject("", "", "", "").getMessage());
 		assertEquals(Messages.ProtexPostScan_getProjectCreateFailed(),
 				descriptor.doCreateProject(goodUrl.getProtexServerId(), "", "", "").getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectCreateFailed(),
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials, "", "").getMessage());
 
-		assertTrue(descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-				testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage().contains("already exists."));
-
+		assertEquals(
+				"java.net.MalformedURLException: no protocol: NOTAURL",
+				descriptor.doCreateProject(badUrl.getProtexServerId(), validCredentials, "TEST_PROJECT_NAME", "")
+				.getMessage());
+		assertEquals("Do not include &#039;/&#039; in the Server Url.",
+				descriptor.doCreateProject(badUrlBadPath.getProtexServerId(), validCredentials, "TEST_PROJECT_NAME", "")
+				.getMessage());
 		assertEquals(
 				"Protex server Username was not provided.",
 				descriptor.doCreateProject(goodUrl.getProtexServerId(), noUserName,
-						testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage());
+						"TEST_PROJECT_NAME", "").getMessage());
 
 		assertEquals(
 				"Did not provide a valid Protex Password.",
 				descriptor.doCreateProject(goodUrl.getProtexServerId(), noPassword,
-						testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage());
+						"TEST_PROJECT_NAME", "").getMessage());
 
 		assertEquals(
 				"Protex server Username was not provided.",
 				descriptor.doCreateProject(goodUrl.getProtexServerId(), noCredentials,
-						testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage());
+						"TEST_PROJECT_NAME", "").getMessage());
 
-		assertEquals(
-				"java.net.MalformedURLException: no protocol: NOTAURL",
-				descriptor.doCreateProject(badUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage());
-		assertEquals(
-				"Do not include &#039;/&#039; in the Server Url.",
-				descriptor.doCreateProject(badUrlBadPath.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_NAME"), "").getMessage());
-		assertEquals(
-				"Project &quot;" + testProperties.getProperty("TEST_PROJECT_CREATION_NAME") + "&quot; Created!",
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_CREATION_NAME"), "").getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectCreateFailed(),
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_CREATION_NAME") + "2", "PROJECTSHOULDNOTEXISTTOCLONEFROM").getMessage());
-		assertEquals(
-				"Project &quot;" + testProperties.getProperty("TEST_PROJECT_CREATION_NAME") + "2" + "&quot; Created!",
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_PROJECT_CREATION_NAME") + "2", testProperties.getProperty("TEST_PROJECT_NAME")).getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectNameCreateAtRuntime(),
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-						"${JOB_NAME}", "").getMessage());
-		assertEquals(Messages.ProtexPostScan_getProjectTemplateNameCreateAtRuntime(),
-				descriptor.doCreateProject(goodUrl.getProtexServerId(), validCredentials,
-						"Test Project", "${JOB_NAME}").getMessage());
-		assertEquals("Project name should be under &quot;250&quot; characters in length.",
-				descriptor.doCheckProtexPostProjectName(goodUrl.getProtexServerId(), validCredentials,
-						"ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME"
-								+ "ITSFRIDAYBEERTIMEITSFRIDAYBEERTIMEITSFRIDAYBEERTIME").getMessage());
 
 	}
 
@@ -672,18 +529,18 @@ public class PostBuildProtexScanDescriptorTest {
 		final ProtexServerInfo badUrlBadPath = new ProtexServerInfo(null, "http://Example", "100", null);
 		final ProtexServerInfo badUrlBadLongPath = new ProtexServerInfo(null, "http://Example/Test", "100", null);
 
-		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, testProperties.getProperty("TEST_PROTEX_SERVER_URL"), "100", null);
+		final ProtexServerInfo goodUrl = new ProtexServerInfo(null, "https://www.google.com", "100", null);
 
 		descriptor.getProtexServers().add(badUrlEmpty);
 		descriptor.getProtexServers().add(badUrlBadPath);
 		descriptor.getProtexServers().add(badUrlBadLongPath);
 		descriptor.getProtexServers().add(goodUrl);
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
 
 		final String fakeReportName = "Fake Report Name ASSERTION";
 
@@ -704,12 +561,6 @@ public class PostBuildProtexScanDescriptorTest {
 				descriptor.doCheckProtexReportTemplate(badUrlBadPath.getProtexServerId(), validCredentials, fakeReportName));
 		assertEquals(FormValidation.ok(),
 				descriptor.doCheckProtexReportTemplate(badUrlBadLongPath.getProtexServerId(), validCredentials, fakeReportName));
-		assertEquals(
-				"Could not find the Report Template : " + fakeReportName,
-				descriptor.doCheckProtexReportTemplate(goodUrl.getProtexServerId(), validCredentials, fakeReportName).getMessage());
-		assertEquals(Messages.ProtexPostScan_getReportTemplateExists(),
-				descriptor.doCheckProtexReportTemplate(goodUrl.getProtexServerId(), validCredentials,
-						testProperties.getProperty("TEST_REPORT_TEMPLATE")).getMessage());
 
 	}
 

@@ -24,15 +24,11 @@ package com.blackducksoftware.integration.protex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import javax.servlet.ServletException;
 
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,7 +38,6 @@ import com.blackducksoftware.integration.protex.helper.TestHelper;
 import com.blackducksoftware.integration.protex.jenkins.Messages;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider.UserFacingAction;
 
-import hudson.ProxyConfiguration;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
@@ -54,20 +49,6 @@ public class ProtexServerInfoDescriptorTest {
 	@Rule
 	public JenkinsRule j = new JenkinsRule();
 
-	private static Properties testProperties;
-
-	@BeforeClass
-	public static void init() {
-		testProperties = new Properties();
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final InputStream is = classLoader.getResourceAsStream("test.properties");
-		try {
-			testProperties.load(is);
-			is.close();
-		} catch (final IOException e) {
-			System.err.println("reading test.properties failed!");
-		}
-	}
 
 	@Test
 	public void testDoCheckProtexPostServerName() throws Exception {
@@ -84,24 +65,9 @@ public class ProtexServerInfoDescriptorTest {
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexPostServerUrl("http://example.com/"));
 		assertEquals(Messages.ProtexPostScan_getCanNotReachThisServer_0_("java.net.UnknownHostException: HopefullyNobodyHasReservedThisReallyLongDomain.com"),
 				descriptor.doCheckProtexPostServerUrl("http://HopefullyNobodyHasReservedThisReallyLongDomain.com").getMessage());
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexPostServerUrl(testProperties.getProperty("TEST_PROTEX_SERVER_URL")));
 
 	}
 
-	@Test
-	public void testDoCheckProtexPostServerUrlThroughProxy() throws Exception {
-		final ProtexServerInfoDescriptor descriptor = new ProtexServerInfoDescriptor();
-		final FormValidation validation = descriptor.doCheckProtexPostServerUrl(testProperties.getProperty("TEST_PROTEX_SERVER_URL_REQUIRES_PROXY"));
-		assertTrue(validation.getMessage(), validation.getMessage().contains(Messages.ProtexPostScan_getCanNotReachThisServer_0_("")));
-		assertEquals(FormValidation.Kind.WARNING, validation.kind);
-
-		final ProxyConfiguration proxy = new ProxyConfiguration(testProperties.getProperty("TEST_PROXY_HOST_PASSTHROUGH"), Integer.valueOf(testProperties
-				.getProperty("TEST_PROXY_PORT_PASSTHROUGH")));
-		j.getInstance().proxy = proxy;
-		assertEquals(FormValidation.ok(),
-				descriptor.doCheckProtexPostServerUrl(testProperties.getProperty("TEST_PROTEX_SERVER_URL_REQUIRES_PROXY")));
-	}
 
 	@Test
 	public void testDoFillProtexTestCredentialsIdItems() {
@@ -112,8 +78,7 @@ public class ProtexServerInfoDescriptorTest {
 		assertEquals("", dropDownList.get(0).value);
 		String credentialId = null;
 		try {
-			credentialId = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-					testProperties.getProperty("TEST_PASSWORD"));
+			credentialId = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "TEST_PASSWORD");
 		} catch (final IOException e) {
 			e.printStackTrace();
 			assertNull(e);
@@ -138,11 +103,11 @@ public class ProtexServerInfoDescriptorTest {
 	public void testDoCheckProtexTestCredentialsId() throws IOException, ServletException {
 		final ProtexServerInfoDescriptor descriptor = new ProtexServerInfoDescriptor();
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
+		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME",
+				"TEST_PASSWORD");
 
 		assertEquals(FormValidation.ok(), descriptor.doCheckProtexTestCredentialsId(""));
 		assertEquals(Messages.ProtexPostScan_getNoUserNameProvided(), descriptor.doCheckProtexTestCredentialsId(noUserName).getMessage());
@@ -156,13 +121,9 @@ public class ProtexServerInfoDescriptorTest {
 	public void testDoTestConnection() throws IOException {
 		final ProtexServerInfoDescriptor descriptor = new ProtexServerInfoDescriptor();
 
-		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", testProperties.getProperty("TEST_PASSWORD"));
-		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"), "");
+		final String noUserName = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "TEST_PASSWORD");
+		final String noPassword = TestHelper.addCredentialsToStore(new UserFacingAction(), "TEST_USERNAME", "");
 		final String noCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "", "");
-		final String validCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), testProperties.getProperty("TEST_USERNAME"),
-				testProperties.getProperty("TEST_PASSWORD"));
-		final String badCredentials = TestHelper.addCredentialsToStore(new UserFacingAction(), "MADEUPUSERNAME",
-				"BEERTIMEPASSWORD");
 
 		FormValidation result = null;
 
@@ -170,29 +131,21 @@ public class ProtexServerInfoDescriptorTest {
 		assertEquals(FormValidation.Kind.ERROR, result.kind);
 		assertEquals(Messages.ProtexPostScan_getPleaseSetServer(), result.getMessage());
 
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), "", null);
+		result = descriptor.doTestConnection("https://www.google.com", "", null);
 		assertEquals(FormValidation.Kind.ERROR, result.kind);
 		assertEquals(Messages.ProtexPostScan_getNoCredentialsSelected(), result.getMessage());
 
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), noUserName, null);
+		result = descriptor.doTestConnection("https://www.google.com", noUserName, null);
 		assertEquals(FormValidation.Kind.ERROR, result.kind);
 		assertEquals(Messages.ProtexPostScan_getNoUserNameProvided(), result.getMessage());
 
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), noPassword, null);
+		result = descriptor.doTestConnection("https://www.google.com", noPassword, null);
 		assertEquals(FormValidation.Kind.ERROR, result.kind);
 		assertEquals(Messages.ProtexPostScan_getNoPasswordProvided(), result.getMessage());
 
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), noCredentials, null);
+		result = descriptor.doTestConnection("https://www.google.com", noCredentials, null);
 		assertEquals(FormValidation.Kind.ERROR, result.kind);
 		assertEquals(Messages.ProtexPostScan_getNoCredentialsSelected(), result.getMessage());
-
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), validCredentials, null);
-		assertEquals(FormValidation.Kind.OK, result.kind);
-		assertEquals("Connection Successful!!", result.getMessage());
-
-		result = descriptor.doTestConnection(testProperties.getProperty("TEST_PROTEX_SERVER_URL"), badCredentials, null);
-		assertEquals(FormValidation.Kind.ERROR, result.kind);
-		assertEquals("The user name or password provided was not valid.", result.getMessage());
 
 	}
 }

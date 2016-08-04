@@ -158,9 +158,20 @@ public class PostBuildProtexScanDescriptor extends BuildStepDescriptor<Publisher
 	}
 
 	public String getPluginVersion() {
-		final Plugin p = Jenkins.getInstance().getPlugin("protex-jenkins");
-		final PluginWrapper pw = p.getWrapper();
-		return pw.getVersion();
+		String pluginVersion = "<unknown>";
+		final Jenkins jenkins = Jenkins.getInstance();
+		if (jenkins != null) {
+			// Jenkins still active
+			final Plugin p = jenkins.getPlugin("protex-jenkins");
+			if (p != null) {
+				// plugin found
+				final PluginWrapper pw = p.getWrapper();
+				if (pw != null) {
+					pluginVersion = pw.getVersion();
+				}
+			}
+		}
+		return pluginVersion;
 	}
 
 	public Double getDefaultMemory() {

@@ -221,6 +221,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>10.0.1</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
