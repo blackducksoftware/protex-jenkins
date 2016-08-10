@@ -84,10 +84,6 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       <url>https://updates.suite.blackducksoftware.com/integrations/</url>
     </repository>
     <repository>
-      <id>bintray-bds-integration</id>
-      <url>http://dl.bintray.com/bds/integration/</url>
-    </repository>
-    <repository>
       <id>maven-snapshot</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
