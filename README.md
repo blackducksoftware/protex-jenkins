@@ -158,4 +158,4 @@ Once configured, Click Save and Build Now :)
 
 Enjoy!
 		
-* Regular Protex Project used as a template 
+* Regular Protex Project used as a template
