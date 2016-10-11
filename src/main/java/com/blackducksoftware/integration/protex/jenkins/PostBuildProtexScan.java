@@ -42,8 +42,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
+import org.json.JSONException;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.restlet.resource.ResourceException;
 
+import com.blackducksoftware.integration.phone.home.PhoneHomeClient;
+import com.blackducksoftware.integration.phone.home.enums.BlackDuckName;
+import com.blackducksoftware.integration.phone.home.enums.ThirdPartyName;
+import com.blackducksoftware.integration.phone.home.exception.PhoneHomeException;
+import com.blackducksoftware.integration.phone.home.exception.PropertiesLoaderException;
 import com.blackducksoftware.integration.protex.ProtexFacade;
 import com.blackducksoftware.integration.protex.ProtexFacadeException;
 import com.blackducksoftware.integration.protex.ProtexServerInfo;
@@ -310,6 +317,20 @@ public class PostBuildProtexScan extends Recorder {
 						e.printSmallStackTrace(logger);
 						build.setResult(Result.UNSTABLE);
 						return true;
+					}
+
+					// Phone-Home
+					try {
+						String protexHostName = null;
+						try {
+							final URL url = new URL(currentServer.getProtexPostServerUrl());
+							protexHostName = url.getHost();
+						} catch (final Exception e) {
+							logger.debug("Could not get the Protex Host name.");
+						}
+						bdPhoneHome(protexHostName);
+					} catch (final Exception e) {
+						logger.debug("Unable to phone-home", e);
 					}
 
 					logger.info("Starting Protex Scan...");
@@ -832,6 +853,26 @@ public class PostBuildProtexScan extends Recorder {
 		}
 
 		return serverIdConfigured && credentialsIdConfigured && projectNameConfigured && scanMemoryConfigured;
+	}
+
+	/**
+	 * @param protexHostName
+	 *            Host name of the protex instance that this plugin uses
+	 *
+	 *            This method "phones-home" to the internal BlackDuck
+	 *            Integrations server. Every time a build is kicked off,
+	 */
+	public void bdPhoneHome(final String protexHostName)
+			throws IOException, PhoneHomeException, PropertiesLoaderException, ResourceException, JSONException {
+		if (StringUtils.isNotBlank(protexHostName)) {
+			final String thirdPartyVersion = Jenkins.getVersion().toString();
+			final String pluginVersion = getDescriptor().getPluginVersion();
+			if (StringUtils.isNotBlank(thirdPartyVersion) && StringUtils.isNotBlank(pluginVersion)) {
+				final PhoneHomeClient phClient = new PhoneHomeClient();
+				phClient.callHomeIntegrations(null, protexHostName, BlackDuckName.PROTEX, "N/A", ThirdPartyName.JENKINS,
+						thirdPartyVersion, pluginVersion);
+			}
+		}
 	}
 
 }
