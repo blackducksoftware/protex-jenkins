@@ -69,10 +69,6 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
     <repository>
-      <id>bintray-bds-integration</id>
-      <url>http://dl.bintray.com/bds/integration/</url>
-    </repository>
-    <repository>
       <id>jcenter</id>
       <url>https://jcenter.bintray.com</url>
     </repository>
@@ -82,10 +78,6 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       </snapshots>
       <id>bds-int-public</id>
       <url>https://updates.suite.blackducksoftware.com/integrations/</url>
-    </repository>
-    <repository>
-      <id>maven-snapshot</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
   </repositories>
   <pluginRepositories>
@@ -193,7 +185,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>
       <artifactId>protex-common</artifactId>
-      <version>1.1.7</version>
+      <version>1.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>

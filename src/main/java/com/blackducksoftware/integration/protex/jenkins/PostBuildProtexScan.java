@@ -328,7 +328,8 @@ public class PostBuildProtexScan extends Recorder {
 						} catch (final Exception e) {
 							logger.debug("Could not get the Protex Host name.");
 						}
-						bdPhoneHome(protexHostName);
+						final String protexVersion = facade.getProtexVersion();
+						bdPhoneHome(protexHostName, protexVersion);
 					} catch (final Exception e) {
 						logger.debug("Unable to phone-home", e);
 					}
@@ -862,14 +863,15 @@ public class PostBuildProtexScan extends Recorder {
 	 *            This method "phones-home" to the internal BlackDuck
 	 *            Integrations server. Every time a build is kicked off,
 	 */
-	public void bdPhoneHome(final String protexHostName)
+	public void bdPhoneHome(final String protexHostName, final String protexVersion)
 			throws IOException, PhoneHomeException, PropertiesLoaderException, ResourceException, JSONException {
 		if (StringUtils.isNotBlank(protexHostName)) {
 			final String thirdPartyVersion = Jenkins.getVersion().toString();
 			final String pluginVersion = getDescriptor().getPluginVersion();
 			if (StringUtils.isNotBlank(thirdPartyVersion) && StringUtils.isNotBlank(pluginVersion)) {
 				final PhoneHomeClient phClient = new PhoneHomeClient();
-				phClient.callHomeIntegrations(null, protexHostName, BlackDuckName.PROTEX, "N/A", ThirdPartyName.JENKINS,
+				phClient.callHomeIntegrations(null, protexHostName, BlackDuckName.PROTEX, protexVersion,
+						ThirdPartyName.JENKINS,
 						thirdPartyVersion, pluginVersion);
 			}
 		}
