@@ -12,7 +12,7 @@ You can download the latest source from GitHub: https://github.com/blackducksoft
 You can download the latest release from GitHub.
 
 ## Documentation ##
-All documentation for protex-jenkins can be found in project:  https://github.com/blackducksoftware/integration-all
+All documentation for protex-jenkins can be found in project:  https://github.com/blackducksoftware/protex-jenkins/wiki
 
 ## License ##
 Apache License 2.0
