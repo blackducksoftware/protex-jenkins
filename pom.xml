@@ -11,7 +11,7 @@
 
   <groupId>com.blackducksoftware.integration</groupId>
   <artifactId>protex-jenkins</artifactId>
-  <version>1.4.2-SNAPSHOT</version>
+  <version>1.4.3-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>BD Protex Plugin for Jenkins CI</name>
@@ -51,7 +51,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
     </repository>
     <snapshotRepository>
       <id>artifactory.blackducksoftware.com</id>
-      <url>http://artifactory.blackducksoftware.com:8081/artifactory/bds-jenkins-protex-plugins-snapshot</url>
+      <url>https://test-repo.blackducksoftware.com/artifactory/bds-jenkins-protex-plugins-snapshot</url>
     </snapshotRepository>
   </distributionManagement>
 
@@ -185,7 +185,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>
       <artifactId>protex-common</artifactId>
-      <version>1.1.8-SNAPSHOT</version>
+      <version>1.1.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>
@@ -429,7 +429,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       </build>
       <properties>
         <repo-id>bds-artifactory</repo-id>
-        <repo-url>http://artifactory.blackducksoftware.com:8081/artifactory/bds-jenkins-protex-plugins</repo-url>
+        <repo-url>https://test-repo.blackducksoftware.com/artifactory/bds-jenkins-protex-plugins</repo-url>
       </properties>
     </profile>
     <profile>
@@ -493,7 +493,7 @@ Automate Protex Analysis as part of your build job. Create projects in Protex as
       </build>
       <properties>
         <repo-id>suiterepo</repo-id>
-        <repo-url>http://suiterepo.blackducksoftware.com:8181/artifactory/bds-jenkins-protex-plugins</repo-url>
+        <repo-url>https://test-repo.blackducksoftware.com/artifactory/bds-jenkins-protex-plugins</repo-url>
       </properties>
     </profile>
   </profiles>
